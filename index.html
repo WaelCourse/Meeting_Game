@@ -33,19 +33,33 @@
     .box h3 {
       margin-top: 0;
     }
+    #items {
+      background: #fff;
+      border: 2px solid #00acc1;
+      border-radius: 10px;
+      min-height: 100px;
+      margin-top: 30px;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
     .item {
       background: #e0f7fa;
       border: 1px solid #00acc1;
       padding: 10px;
-      margin: 10px;
+      margin: 5px;
       border-radius: 8px;
       cursor: grab;
+      user-select: none;
     }
     .correct {
-      background-color: #c8e6c9;
+      background-color: #c8e6c9 !important;
     }
     .incorrect {
-      background-color: #ffcdd2;
+      background-color: #ffcdd2 !important;
     }
     button {
       margin-top: 20px;
@@ -67,6 +81,10 @@
       .box {
         width: 90%;
       }
+      #items {
+        width: 90%;
+        justify-content: flex-start;
+      }
     }
   </style>
 </head>
@@ -85,7 +103,7 @@
     </div>
   </div>
 
-  <div class="container" id="items">
+  <div id="items" class="container">
     <!-- البنود ستُحقن هنا عبر JavaScript -->
   </div>
 
@@ -123,7 +141,6 @@
       after: document.getElementById("after"),
     };
 
-    // دالة لإنشاء العناصر ووضعها في قائمة البنود
     function createItems() {
       itemsContainer.innerHTML = "";
       itemsData.forEach((item, index) => {
@@ -139,7 +156,6 @@
       });
     }
 
-    // إنشاء العناصر عند تحميل الصفحة
     createItems();
 
     function allowDrop(ev) {
@@ -159,7 +175,7 @@
 
     Object.values(boxes).forEach(box => {
       box.addEventListener("dragover", allowDrop);
-      box.addEventListener("drop", function(ev) { drop(ev, box.id); });
+      box.addEventListener("drop", ev => drop(ev, box.id));
     });
 
     function checkAnswers() {
@@ -176,8 +192,15 @@
     }
 
     function resetGame() {
-      // إعادة جميع البنود إلى صندوق البنود الأصلي
-      createItems();
+      // أفرغ محتويات الصناديق الثلاثة وأرجع البنود إلى itemsContainer
+      Object.values(boxes).forEach(box => {
+        // أنقل جميع العناصر داخل الصندوق إلى itemsContainer
+        while (box.firstChild && box.firstChild.tagName === "DIV") {
+          const item = box.firstChild;
+          item.classList.remove("correct", "incorrect");
+          itemsContainer.appendChild(item);
+        }
+      });
     }
   </script>
 </body>
