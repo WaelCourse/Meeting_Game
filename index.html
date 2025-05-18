@@ -141,9 +141,20 @@
       after: document.getElementById("after"),
     };
 
+    // دالة خلط (Fisher-Yates shuffle)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
     function createItems() {
       itemsContainer.innerHTML = "";
-      itemsData.forEach((item, index) => {
+      // خلط البنود قبل الإنشاء
+      const shuffledItems = shuffle([...itemsData]); // نسخة من المصفوفة
+      shuffledItems.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "item";
         div.textContent = item.text;
@@ -194,7 +205,6 @@
     function resetGame() {
       // أفرغ محتويات الصناديق الثلاثة وأرجع البنود إلى itemsContainer
       Object.values(boxes).forEach(box => {
-        // أنقل جميع العناصر داخل الصندوق إلى itemsContainer
         while (box.firstChild && box.firstChild.tagName === "DIV") {
           const item = box.firstChild;
           item.classList.remove("correct", "incorrect");
