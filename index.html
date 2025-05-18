@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>لعبة تنظيم الاجتماعات</title>
   <style>
     body {
@@ -48,7 +48,7 @@
       background-color: #ffcdd2;
     }
     button {
-      margin-top: 30px;
+      margin-top: 20px;
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
@@ -56,6 +56,8 @@
       color: white;
       border: none;
       border-radius: 5px;
+      margin-left: 10px;
+      margin-right: 10px;
     }
     @media (max-width: 768px) {
       .container {
@@ -87,7 +89,10 @@
     <!-- البنود ستُحقن هنا عبر JavaScript -->
   </div>
 
-  <button onclick="checkAnswers()">تحقق من الإجابات</button>
+  <div>
+    <button onclick="checkAnswers()">تحقق من الإجابات</button>
+    <button onclick="resetGame()">إعادة ضبط</button>
+  </div>
 
   <script>
     const itemsData = [
@@ -112,17 +117,30 @@
     ];
 
     const itemsContainer = document.getElementById("items");
+    const boxes = {
+      before: document.getElementById("before"),
+      during: document.getElementById("during"),
+      after: document.getElementById("after"),
+    };
 
-    itemsData.forEach((item, index) => {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.textContent = item.text;
-      div.draggable = true;
-      div.id = "item-" + index;
-      div.dataset.correctBox = item.correctBox;
-      div.addEventListener("dragstart", drag);
-      itemsContainer.appendChild(div);
-    });
+    // دالة لإنشاء العناصر ووضعها في قائمة البنود
+    function createItems() {
+      itemsContainer.innerHTML = "";
+      itemsData.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.textContent = item.text;
+        div.draggable = true;
+        div.id = "item-" + index;
+        div.dataset.correctBox = item.correctBox;
+        div.classList.remove("correct", "incorrect");
+        div.addEventListener("dragstart", drag);
+        itemsContainer.appendChild(div);
+      });
+    }
+
+    // إنشاء العناصر عند تحميل الصفحة
+    createItems();
 
     function allowDrop(ev) {
       ev.preventDefault();
@@ -136,16 +154,16 @@
       ev.preventDefault();
       const data = ev.dataTransfer.getData("text");
       const element = document.getElementById(data);
-      document.getElementById(boxId).appendChild(element);
+      boxes[boxId].appendChild(element);
     }
 
-    document.querySelectorAll('.box').forEach(box => {
+    Object.values(boxes).forEach(box => {
       box.addEventListener("dragover", allowDrop);
       box.addEventListener("drop", function(ev) { drop(ev, box.id); });
     });
 
     function checkAnswers() {
-      document.querySelectorAll('.item').forEach(item => {
+      document.querySelectorAll(".item").forEach(item => {
         const parentId = item.parentElement.id;
         if (parentId === item.dataset.correctBox) {
           item.classList.remove("incorrect");
@@ -155,6 +173,11 @@
           item.classList.add("incorrect");
         }
       });
+    }
+
+    function resetGame() {
+      // إعادة جميع البنود إلى صندوق البنود الأصلي
+      createItems();
     }
   </script>
 </body>
