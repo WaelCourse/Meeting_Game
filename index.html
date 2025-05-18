@@ -48,4 +48,164 @@
     }
     .item {
       background: #e0f7fa;
-      border
+      border: 1px solid #00acc1;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      cursor: grab;
+      user-select: none;
+    }
+    .correct {
+      background-color: #c8e6c9 !important;
+    }
+    .incorrect {
+      background-color: #ffcdd2 !important;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #00acc1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .box {
+        width: 90%;
+      }
+      #items {
+        width: 90%;
+        justify-content: flex-start;
+      }
+    }
+    #reload-msg {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 لعبة تنظيم الاجتماعات</h1>
+  <p>اسحب كل بند وضعه في المرحلة المناسبة: قبل - أثناء - بعد الاجتماع</p>
+  <div class="container">
+    <div class="box" id="before">
+      <h3>🟦 قبل الاجتماع</h3>
+    </div>
+    <div class="box" id="during">
+      <h3>🟨 أثناء الاجتماع</h3>
+    </div>
+    <div class="box" id="after">
+      <h3>🟩 بعد الاجتماع</h3>
+    </div>
+  </div>
+
+  <div id="items" class="container">
+    <!-- البنود ستُحقن هنا عبر JavaScript -->
+  </div>
+
+  <div>
+    <button onclick="checkAnswers()">تحقق من الإجابات</button>
+  </div>
+
+  <p id="reload-msg">للبدء مجددًا، يرجى تحديث الصفحة (إعادة تحميل).</p>
+
+  <script>
+    const itemsData = [
+      { text: "تحديد موعد ومكان الاجتماع", correctBox: "before" },
+      { text: "إعداد جدول الأعمال", correctBox: "before" },
+      { text: "إرسال الدعوات", correctBox: "before" },
+      { text: "التأكد من عمل التجهيزات الخاصة بالاجتماع", correctBox: "before" },
+      { text: "توزيع الملفات الخاصة بجدول الأعمال على أعضاء اللجنة", correctBox: "before" },
+      { text: "التأكد من الاتفاق / إعداد الضيافة المناسبة للحضور", correctBox: "before" },
+      { text: "استدعاء الأشخاص لحضور الاجتماع حسب طلب أعضاء اللجنة", correctBox: "before" },
+      { text: "تسجيل الحضور والغياب", correctBox: "during" },
+      { text: "كتابة محضر الاجتماع", correctBox: "during" },
+      { text: "ضبط الوقت", correctBox: "during" },
+      { text: "دعم رئيس اللجنة", correctBox: "during" },
+      { text: "الإشراف على تقديم الضيافة", correctBox: "during" },
+      { text: "إعداد نسخ من المستندات الجديدة المراد توزيعها أثناء الاجتماع", correctBox: "during" },
+      { text: "إعداد المحضر النهائي", correctBox: "after" },
+      { text: "إرسال مسودة المحضر لأعضاء اللجنة لتقديم اقتراحات التعديل", correctBox: "after" },
+      { text: "توزيع المحضر النهائي", correctBox: "after" },
+      { text: "متابعة تنفيذ القرارات", correctBox: "after" },
+      { text: "إعادة الوثائق والملفات إلى أماكنها الأصلية", correctBox: "after" }
+    ];
+
+    const itemsContainer = document.getElementById("items");
+    const boxes = {
+      before: document.getElementById("before"),
+      during: document.getElementById("during"),
+      after: document.getElementById("after"),
+    };
+
+    // دالة خلط (Fisher-Yates shuffle)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function createItems() {
+      itemsContainer.innerHTML = "";
+      const shuffledItems = shuffle([...itemsData]); // نسخة من المصفوفة
+      shuffledItems.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.textContent = item.text;
+        div.draggable = true;
+        div.id = "item-" + index;
+        div.dataset.correctBox = item.correctBox;
+        div.classList.remove("correct", "incorrect");
+        div.addEventListener("dragstart", drag);
+        itemsContainer.appendChild(div);
+      });
+    }
+
+    createItems();
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev, boxId) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text");
+      const element = document.getElementById(data);
+      boxes[boxId].appendChild(element);
+    }
+
+    Object.values(boxes).forEach(box => {
+      box.addEventListener("dragover", allowDrop);
+      box.addEventListener("drop", ev => drop(ev, box.id));
+    });
+
+    function checkAnswers() {
+      document.querySelectorAll(".item").forEach(item => {
+        const parentId = item.parentElement.id;
+        if (parentId === item.dataset.correctBox) {
+          item.classList.remove("incorrect");
+          item.classList.add("correct");
+        } else {
+          item.classList.remove("correct");
+          item.classList.add("incorrect");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
