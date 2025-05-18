@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لعبة تنظيم الاجتماعات</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .box {
+      flex: 1 1 300px;
+      min-height: 300px;
+      background: #fff;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .box h3 {
+      margin-top: 0;
+    }
+    .item {
+      background: #e0f7fa;
+      border: 1px solid #00acc1;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      cursor: grab;
+    }
+    .correct {
+      background-color: #c8e6c9;
+    }
+    .incorrect {
+      background-color: #ffcdd2;
+    }
+    button {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #00acc1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .box {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 لعبة تنظيم الاجتماعات</h1>
+  <p>اسحب كل بند وضعه في المرحلة المناسبة: قبل - أثناء - بعد الاجتماع</p>
+  <div class="container">
+    <div class="box" id="before">
+      <h3>🟦 قبل الاجتماع</h3>
+    </div>
+    <div class="box" id="during">
+      <h3>🟨 أثناء الاجتماع</h3>
+    </div>
+    <div class="box" id="after">
+      <h3>🟩 بعد الاجتماع</h3>
+    </div>
+  </div>
+
+  <div class="container" id="items">
+    <!-- البنود ستُحقن هنا عبر JavaScript -->
+  </div>
+
+  <button onclick="checkAnswers()">تحقق من الإجابات</button>
+
+  <script>
+    const itemsData = [
+      { text: "تحديد موعد ومكان الاجتماع", correctBox: "before" },
+      { text: "إعداد جدول الأعمال", correctBox: "before" },
+      { text: "إرسال الدعوات", correctBox: "before" },
+      { text: "التأكد من عمل التجهيزات الخاصة بالاجتماع", correctBox: "before" },
+      { text: "توزيع الملفات الخاصة بجدول الأعمال على أعضاء اللجنة", correctBox: "before" },
+      { text: "التأكد من الاتفاق / إعداد الضيافة المناسبة للحضور", correctBox: "before" },
+      { text: "استدعاء الأشخاص لحضور الاجتماع حسب طلب أعضاء اللجنة", correctBox: "before" },
+      { text: "تسجيل الحضور والغياب", correctBox: "during" },
+      { text: "كتابة محضر الاجتماع", correctBox: "during" },
+      { text: "ضبط الوقت", correctBox: "during" },
+      { text: "دعم رئيس اللجنة", correctBox: "during" },
+      { text: "الإشراف على تقديم الضيافة", correctBox: "during" },
+      { text: "إعداد نسخ من المستندات الجديدة المراد توزيعها أثناء الاجتماع", correctBox: "during" },
+      { text: "إعداد المحضر النهائي", correctBox: "after" },
+      { text: "إرسال مسودة المحضر لأعضاء اللجنة لتقديم اقتراحات التعديل", correctBox: "after" },
+      { text: "توزيع المحضر النهائي", correctBox: "after" },
+      { text: "متابعة تنفيذ القرارات", correctBox: "after" },
+      { text: "إعادة الوثائق والملفات إلى أماكنها الأصلية", correctBox: "after" }
+    ];
+
+    const itemsContainer = document.getElementById("items");
+
+    itemsData.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.textContent = item.text;
+      div.draggable = true;
+      div.id = "item-" + index;
+      div.dataset.correctBox = item.correctBox;
+      div.addEventListener("dragstart", drag);
+      itemsContainer.appendChild(div);
+    });
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev, boxId) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text");
+      const element = document.getElementById(data);
+      document.getElementById(boxId).appendChild(element);
+    }
+
+    document.querySelectorAll('.box').forEach(box => {
+      box.addEventListener("dragover", allowDrop);
+      box.addEventListener("drop", function(ev) { drop(ev, box.id); });
+    });
+
+    function checkAnswers() {
+      document.querySelectorAll('.item').forEach(item => {
+        const parentId = item.parentElement.id;
+        if (parentId === item.dataset.correctBox) {
+          item.classList.remove("incorrect");
+          item.classList.add("correct");
+        } else {
+          item.classList.remove("correct");
+          item.classList.add("incorrect");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
